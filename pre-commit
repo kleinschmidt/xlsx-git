@@ -13,21 +13,21 @@ TMP_PREFIX='.~' # prefix XML directory--should NOT conflict with
 # -- end config -- #
 
 echo
-echo "=== Pre-commit XLSX processing ===="
+echo "=== Pre-commit PPTX processing ===="
 
-unpack_xlsx () {
-    # unzip the xlsx file 
+unpack_pptx () {
+    # unzip the pptx file 
     if [ -e "$1" ]; then
         if [ -e "${TMP_PREFIX}$1" ]; then rm -rf "${TMP_PREFIX}$1"; fi
         unzip "$1" -d "${TMP_PREFIX}$1"
     else
         # abort the commit if this isn't an excel file somehow
-        echo "$1 is not an xlsx file. this is a bug."
+        echo "$1 is not an pptx file. this is a bug."
         exit 3
     fi
 }
 
-# create a placeholder text file for the .xlsx file, which uniquely identifies
+# create a placeholder text file for the .pptx file, which uniquely identifies
 # it and prevents losing work on a checkout
 replace_with_placeholder () {
     sha1sum "$1" | tee "$1" > /dev/null # hack for overwriting without temp file
@@ -39,22 +39,22 @@ reformat_xmls () {
     find "$1" -name "*.xml" -type f -exec xmllint --output '{}' --format '{}' \;
 }
 
-# check that the swap file isn't there (if the xlsx has been staged)
-for i in $(git diff --name-only --cached -- *.xlsx); do 
+# check that the swap file isn't there (if the pptx has been staged)
+for i in $(git diff --name-only --cached -- *.pptx); do 
     dir=$(dirname "$i")
     file=$(basename "$i")
     if [ -e "$dir/~\$$file" ]; then
-        echo "$file swap file present: close xlsx file before committing"
+        echo "$file swap file present: close pptx file before committing"
         exit 2 # excel file is open
     fi
 done
 
-# unpack all the zipfiles (if the xlsx has been staged)
-for i in $(git diff --name-only --cached -- *.xlsx); do 
+# unpack all the zipfiles (if the pptx has been staged)
+for i in $(git diff --name-only --cached -- *.pptx); do 
     dir=$(dirname "$i")
     file=$(basename "$i")
     cd "$dir"
-    unpack_xlsx "$file"
+    unpack_pptx "$file"
     replace_with_placeholder "$file"
     echo -n "Commit placeholder file: "
     file "$file"
